@@ -1,0 +1,22 @@
+# configs/2Hz_sweep_gCaL.yaml
+# Параметрический sweep по g_CaL при частоте 2 Гц
+#
+# Запуск:
+#   python scripts/run.py --config configs/2Hz_sweep_gCaL.yaml \
+#                         --output data/sweep_gCaL_2Hz.h5 \
+#                         --jobs 4
+
+params:
+  stim_period: 500.0       # мс  (2 Гц)
+
+  # Список значений → sweep (3 × 1 = 3 прогона)
+  g_CaL: [3.0e-5, 5.0e-5, 7.0e-5]
+
+config:
+  time_stop: 500000.0      # мс
+  atol:      1.0e-9
+  rtol:      1.0e-9
+  max_step:  0.5
+
+mechanics:
+  F_afterload: 0.0

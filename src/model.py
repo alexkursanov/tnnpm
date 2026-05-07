@@ -12,7 +12,7 @@ model.py
         Вычисляет токи и силы по уже решённой траектории.
         Использует те же приватные функции что и rhs(), без дублирования.
 
-    make_init_state(p) -> InitialState
+    make_init_state(p) -> tuple[InitialState, float]
         Вычисляет самосогласованные начальные условия для механики
         методом бисекции (заменяет delenie() + calculate_init_conditions()).
 
@@ -615,7 +615,11 @@ def _compute_mechanical(
 # ---------------------------------------------------------------------------
 
 
-def _gate_CaL(V, Ca_ss, d, f2, fCass, f):
+def _gate_CaL(V: float, Ca_ss: float, d: float, f2: float, fCass: float, f: float):
+    """Ворота L-типа кальциевого канала.
+
+    fCass зависит от Ca_ss (не от V) — аргумент передаётся явно.
+    """
     d_inf = 1.0 / (1.0 + exp((-8.0 - V) / 7.5))
     tau_d = (1.4 / (1.0 + exp((-35.0 - V) / 13.0)) + 0.25) * (
         1.4 / (1.0 + exp((V + 5.0) / 5.0))
@@ -635,7 +639,12 @@ def _gate_CaL(V, Ca_ss, d, f2, fCass, f):
         + 180.0 / (1.0 + exp((V + 30.0) / 10.0))
         + 20.0
     )
-    return (d_inf - d) / tau_d, (f2_inf - f2) / tau_f2, (fCass_inf - fCass) / tau_fCass, (f_inf - f) / tau_f
+    return (
+        (d_inf - d) / tau_d,
+        (f2_inf - f2) / tau_f2,
+        (fCass_inf - fCass) / tau_fCass,
+        (f_inf - f) / tau_f,
+    )
 
 
 def _gate_Na(V, h, j, m):
@@ -884,7 +893,9 @@ def _fi(l_1: float, p: TNNPMParams) -> float:
     ) - _k_m_v(0.0, p) * _N0(l_1, p)
 
 
-def make_init_state(p: TNNPMParams, base: InitialState | None = None) -> InitialState:
+def make_init_state(
+    p: TNNPMParams, base: InitialState | None = None
+) -> tuple[InitialState, float]:
     """Вычислить самосогласованные начальные условия для механики.
 
     Заменяет delenie() + calculate_init_conditions() из оригинала.
