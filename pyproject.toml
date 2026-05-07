@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+ 
+[project]
+name = "tnnpm"
+version = "0.1.0"
+description = "Electromechanical cardiomyocyte model (TNNPM + EKB mechanics)"
+requires-python = ">=3.11"
+ 
+# Все зависимости управляются conda (environment.yml).
+# pip-список намеренно пустой.
+dependencies = []
+ 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+ 
+[project.scripts]
+tnnpm-run = "scripts.run:main"
+ 
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "scripts*"]
+ 
+[tool.setuptools.package-dir]
+"" = "."
+ 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-v --tb=short"
+pythonpath = ["src"]
+ 
+[tool.coverage.run]
+source = ["src"]
+omit   = ["tests/*", "scripts/*"]

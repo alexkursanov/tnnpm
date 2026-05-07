@@ -1,0 +1,38 @@
+name: tnnpm
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Python
+  - python=3.11
+ 
+  # Численные
+  - numpy>=1.26
+  - scipy>=1.11
+ 
+  # Солвер ODE (требует Sundials — conda-forge ставит его автоматически)
+  - assimulo>=3.5
+ 
+  # Данные
+  - h5py>=3.10
+ 
+  # Конфиги и логирование
+  - pyyaml>=6.0
+  - loguru>=0.7
+ 
+  # Визуализация
+  - matplotlib>=3.8
+ 
+  # Параллелизм для sweep
+  - joblib>=1.3
+ 
+  # Разработка и тесты
+  - pytest>=8.0
+  - pytest-cov>=5.0
+  - ipykernel          # для Jupyter
+  - jupyterlab
+ 
+  # Установить сам пакет в editable-режиме через pip
+  - pip
+  - pip:
+    - -e .
