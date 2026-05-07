@@ -455,7 +455,7 @@ def _compute_electrical(y: np.ndarray, p: TNNPMParams, t: float, ca: dict) -> di
     )
 
     # Ворота
-    dd, df2, dfCass, df = _gate_CaL(V, d, f2, fCass, f)
+    dd, df2, dfCass, df = _gate_CaL(V, Ca_ss, d, f2, fCass, f)
     dh, dj, dm = _gate_Na(V, h, j, m)
     dr, ds = _gate_to(V, r_gate, s)
     dXr1, dXr2 = _gate_Kr(V, Xr1, Xr2)
@@ -615,7 +615,7 @@ def _compute_mechanical(
 # ---------------------------------------------------------------------------
 
 
-def _gate_CaL(V, d, f2, fCass, f):
+def _gate_CaL(V, Ca_ss, d, f2, fCass, f):
     d_inf = 1.0 / (1.0 + exp((-8.0 - V) / 7.5))
     tau_d = (1.4 / (1.0 + exp((-35.0 - V) / 13.0)) + 0.25) * (
         1.4 / (1.0 + exp((V + 5.0) / 5.0))
@@ -626,10 +626,8 @@ def _gate_CaL(V, d, f2, fCass, f):
         + 31.0 / (1.0 + exp((25.0 - V) / 10.0))
         + 80.0 / (1.0 + exp((V + 30.0) / 10.0))
     )
-    fCass_inf = (
-        0.6 / (1.0 + (V / 0.05) ** 2.0) + 0.4
-    )  # аргумент Ca_ss приходит снаружи — ворота fCass зависят от Ca_ss!
-    # NOTE: fCass_inf и tau_fCass зависят от Ca_ss, поэтому они вычисляются в _compute_electrical
+    fCass_inf = 0.6 / (1.0 + (Ca_ss / 0.05) ** 2.0) + 0.4
+    tau_fCass = 80.0 / (1.0 + (Ca_ss / 0.05) ** 2.0) + 2.0
     f_inf = 1.0 / (1.0 + exp((V + 20.0) / 7.0))
     tau_f = (
         1102.5 * exp(-((V + 27.0) ** 2.0) / 225.0)
@@ -637,7 +635,7 @@ def _gate_CaL(V, d, f2, fCass, f):
         + 180.0 / (1.0 + exp((V + 30.0) / 10.0))
         + 20.0
     )
-    return (d_inf - d) / tau_d, (f2_inf - f2) / tau_f2, 0.0, (f_inf - f) / tau_f
+    return (d_inf - d) / tau_d, (f2_inf - f2) / tau_f2, (fCass_inf - fCass) / tau_fCass, (f_inf - f) / tau_f
 
 
 def _gate_Na(V, h, j, m):
@@ -746,16 +744,10 @@ def rhs(
     elec = _compute_electrical(y, p, t, ca)
     mech = _compute_mechanical(y, p, F_afterload, l0)
 
-    # fCass зависит от Ca_ss — вычисляем отдельно (в _gate_CaL передан V, но нужен Ca_ss)
-    Ca_ss = y[_I_CA_SS]
-    fCass_inf = 0.6 / (1.0 + (Ca_ss / 0.05) ** 2.0) + 0.4
-    tau_fCass = 80.0 / (1.0 + (Ca_ss / 0.05) ** 2.0) + 2.0
-    dfCass = (fCass_inf - y[_I_FCASS]) / tau_fCass
-
     dy = np.empty(_N_STATES)
     dy[_I_D] = elec["dd"]
     dy[_I_F2] = elec["df2"]
-    dy[_I_FCASS] = dfCass
+    dy[_I_FCASS] = elec["dfCass"]
     dy[_I_F] = elec["df"]
     dy[_I_CA_SR] = 0.0  # dCa_SR = 0 (переменная сохранена для совместимости)
     dy[_I_CA_I] = elec["dCa_i"]
