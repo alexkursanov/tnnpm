@@ -76,7 +76,8 @@ def integrate(
     # Число точек вывода:
     #   None → CVode сам выбирает шаги (только внутренние точки адаптивного шага)
     #   int  → равномерная сетка из n_out точек на [t0, tfinal]
-    ncp = config.n_out if config.n_out is not None else 0
+    # CVode требует int для ncp; YAML может передать float (1000.0 вместо 1000)
+    ncp = int(config.n_out) if config.n_out is not None else 0
 
     t, y = sim.simulate(config.time_stop, ncp)
 

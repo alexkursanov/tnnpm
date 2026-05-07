@@ -26,10 +26,8 @@ from __future__ import annotations
 
 import dataclasses
 from pathlib import Path
-from typing import Any
 
 import h5py
-import numpy as np
 
 from experiment import SimulationResult
 from parameters import InitialState, SimConfig, TNNPMParams
@@ -225,15 +223,15 @@ def _read_dataclass(grp: h5py.Group, cls):
         if v == "__None__":
             kwargs[k] = None
         else:
-            # Приводим к аннотированному типу
+            # Определяем базовый тип из аннотации, поддерживая union (int | None)
             ann = known[k].type
+            ann_str = str(ann)
+            # Извлекаем первый тип из union: "int | None" → "int"
+            base_type = ann_str.split("|")[0].strip()
             try:
-                if ann in (int, "int") or str(ann) in ("int", "<class 'int'>"):
+                if base_type in ("int", "<class 'int'>") or ann is int:
                     kwargs[k] = int(v)
-                elif ann in (float, "float") or str(ann) in (
-                    "float",
-                    "<class 'float'>",
-                ):
+                elif base_type in ("float", "<class 'float'>") or ann is float:
                     kwargs[k] = float(v)
                 else:
                     kwargs[k] = v
