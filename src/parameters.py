@@ -148,10 +148,10 @@ class TNNPMParams:
     # ------------------------------------------------------------------
 
     # Буферы (мМ)
-    Buf_c: float = 0.11
+    Buf_c: float = 0.13
     K_buf_c: float = 0.00085
     Buf_sr: float = 10.0
-    K_buf_sr: float = 0.3
+    K_buf_sr: float = 0.8
     Buf_ss: float = 0.4
     K_buf_ss: float = 0.00025
     Buf_jsr: float = 10.0
@@ -179,8 +179,8 @@ class TNNPMParams:
 
     # Связывание Ca с TnC (дA)
     A_tot: float = 0.07  # мМ, общий TnC
-    a_on: float = 36.0  # с⁻¹
-    a_off: float = 0.19  # с⁻¹
+    a_on: float = 35.0  # с⁻¹
+    a_off: float = 0.17  # с⁻¹
     k_A: float = 28.0  # мМ⁻¹
 
     # Semin: фосфорилирование p_iup
